@@ -1,0 +1,15 @@
+
+INFO: This is an example info issue.
+This line will be included as part of the "details" string.
+    This line will also be included.
+        And this line as well.
+
+This line will not be included in "details" due to the preceding line break.
+
+WARNING: This is an example warning issue.
+Additional lines of text
+may be specified via 'details'.
+
+//WARNING: This example warning issue will not be sent due to the double slash.
+
+ERROR: An example error issue.

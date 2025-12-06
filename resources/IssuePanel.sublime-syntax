@@ -1,0 +1,58 @@
+%YAML 1.2
+---
+# http://www.sublimetext.com/docs/3/syntax.html
+name: Build Sock Issue Panel Syntax
+scope: output.buildsock
+version: 2
+#hidden: true
+
+contexts:
+  
+  main:
+    - match: ^(?=[^:]*:[0-9]+(:[0-9]+)?:?(?=\s))
+      push:
+        - header-meta
+        - header-column-number
+        - header-line-number
+        - header-filename
+        - header-folder
+
+  header-meta:
+    - meta_scope: meta.header.buildsock
+    - include: immediately-pop
+
+  header-folder:
+    - match: ([^:]+\/)
+      scope: entity.name.folder.buildsock
+    - include: else-pop
+
+  header-filename:
+    - match: ([^:]+)(?=:)
+      scope: entity.name.filename.buildsock
+    - include: else-pop
+
+  header-line-number:
+    - match: (:)([0-9]+)
+      captures:
+        0: meta.header.colon-line-number.buildsock
+        1: punctuation.separator.buildsock
+        2: constant.numeric.line-number.buildsock
+      pop: 1
+    - include: else-pop
+
+  header-column-number:
+    - match: (:)([0-9]+)
+      captures:
+        0: meta.header.colon-column-number.buildsock
+        1: punctuation.separator.buildsock
+        2: constant.numeric.column-number.buildsock
+      pop: 1
+    - include: else-pop
+    
+  else-pop:
+    - match: (?=\S)
+      pop: 1
+
+  immediately-pop:
+    - match: ''
+      pop: 1

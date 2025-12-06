@@ -1,0 +1,4 @@
+
+WARN: This is an example warning issue.
+Additional lines of text
+may be specified via 'details'.

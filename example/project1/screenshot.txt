@@ -1,0 +1,10 @@
+This file is used for the screenshot in README.md
+=================================================
+
+INFO: This is an example info issue.
+
+WARNING: This is an example warning issue.
+Additional lines of text
+may be specified via 'details'.
+
+ERROR: This is an example error issue.
