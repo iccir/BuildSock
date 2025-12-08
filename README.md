@@ -14,7 +14,7 @@ BuildSock solves these problems.
 
 ## Design
 
-![Screenshot](screenshots/main.png)
+![Screenshot](docs/main.png)
 
 ## Usage
 
@@ -169,7 +169,7 @@ This displays all text with the foreground color.
 
 Colorization of the panel is possible by setting `colorize_issue_panel` to `true`:
 
-<img src="screenshots/colorize.png" width=420 height=58>
+<img src="docs/colorize.png" width=420 height=58>
 
 Your active color scheme will need to use the following scopes:
 
