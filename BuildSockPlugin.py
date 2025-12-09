@@ -14,6 +14,7 @@ import base64
 import traceback
 import itertools
 import weakref
+import html
 
 StringOrNone = object()
 NumberOrNone = object()
@@ -333,7 +334,6 @@ class WindowManager:
 
         self.phantom_dicts = [ ]
         self.image_cache = { }
-        self.html_cache  = { }
         
         self.status_message = None
         self.status_spinner = None
@@ -344,7 +344,6 @@ class WindowManager:
 
 
     def handle_settings_changed(self) -> None:
-        self.html_cache = { }
         self.setup_panel()
         self._update_phantoms()
 
@@ -368,18 +367,31 @@ class WindowManager:
         panel.set_read_only(True)
 
 
+    def _make_data_url(self, mime_type: str, resource_path: str) -> str:
+        cache_key = (mime_type, resource_path)
+        
+        if result := self.image_cache.get(cache_key):
+            return result
+
+        data_bytes  = sublime.load_binary_resource(resource_path)
+        data_string = base64.b64encode(data_bytes).decode("ascii")
+
+        result = f"data:{mime_type};base64,{data_string}"
+        self.image_cache[cache_key] = result
+        
+        return result
+
+
     def _make_left_phantom_html(
         self,
+        issue: Issue,
         disclosure_icon: DisclosureIcon,
-        issue_type: IssueType,
         show_disclosures: bool,
         show_issue_icons: bool
     ) -> str:
-        cache_key = ("left", disclosure_icon, issue_type, show_disclosures, show_issue_icons)
-        
-        if result := self.html_cache.get(cache_key):
-            return result
-    
+        issue_type = issue.type
+        tooltip = html.escape(issue.tooltip) if issue.tooltip else ""
+
         disclosure_light_path = DisclosureImageMap[ ( Theme.LIGHT, disclosure_icon ) ]
         disclosure_dark_path  = DisclosureImageMap[ ( Theme.DARK,  disclosure_icon ) ]
 
@@ -405,33 +417,16 @@ class WindowManager:
             image_htmls.append(f'<img width="{size}" height="{size}" src="{icon_url}">')
 
         return """
-            <body id="build-sling-left">
+            <body id="build-sock-left">
                 <style>
                     body { padding-top: %ipx; }
                     .dark  #light-disclosure { display: none }
                     .light #dark-disclosure  { display: none }
                 </style>
-                <a href="toggle:">%s</a>
+                <a href="toggle:" title="%s">%s</a>
             </body>
-        """ % (padding_top, "".join(image_htmls))
-        
-        self.html_cache.set[cache_key] = result
-        
-        return result
+        """ % (padding_top, tooltip, "".join(image_htmls))
 
-
-    def _make_data_url(self, mime_type: str, resource_path: str) -> str:
-        cache_key = (mime_type, resource_path)
-        
-        if result := self.image_cache.get(cache_key):
-            return result
-
-        data_bytes  = sublime.load_binary_resource(resource_path)
-        data_string = base64.b64encode(data_bytes).decode("ascii")
-
-        result = f"data:{mime_type};base64,{data_string}"
-        self.image_cache[cache_key] = result
-        
         return result
 
 
@@ -447,7 +442,7 @@ class WindowManager:
             font_size_css = f"font-size: 0.9rem;"
 
         return """
-            <body id=show-scope>
+            <body id="build-sock-details">
                 <style>
                     code {
                         display: block;
@@ -554,10 +549,10 @@ class WindowManager:
             panel.run_command("append", { "characters": message, "scroll_to_end": True })
 
             if issue.details:
-                collapsed_html    = self._make_left_phantom_html(DisclosureIcon.COLLAPSED, issue.type, show_disclosures, show_issue_icons)
+                collapsed_html    = self._make_left_phantom_html(issue, DisclosureIcon.COLLAPSED, show_disclosures, show_issue_icons)
                 collapsed_phantom = sublime.Phantom(region, collapsed_html, sublime.PhantomLayout.INLINE, lambda str, i=i: self._handle_phantom_toggle(i))
 
-                expanded_html     = self._make_left_phantom_html(DisclosureIcon.EXPANDED, issue.type, show_disclosures, show_issue_icons)
+                expanded_html     = self._make_left_phantom_html(issue, DisclosureIcon.EXPANDED, show_disclosures, show_issue_icons)
                 expanded_phantom  = sublime.Phantom(region, expanded_html, sublime.PhantomLayout.INLINE, lambda str, i=i: self._handle_phantom_toggle(i))
              
                 details_html      = self._make_details_phantom_html(issue.details)
@@ -570,7 +565,7 @@ class WindowManager:
                 }
 
             else:
-                left_html = self._make_left_phantom_html(DisclosureIcon.NONE, issue.type, show_disclosures, show_issue_icons)
+                left_html = self._make_left_phantom_html(issue, DisclosureIcon.NONE, show_disclosures, show_issue_icons)
                 left_phantom = sublime.Phantom(region, left_html, sublime.PhantomLayout.INLINE) 
 
                 phantom_dict = {
