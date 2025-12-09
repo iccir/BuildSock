@@ -26,7 +26,7 @@ Sending results to BuildSock is simple:
 
 For example, to show a failure message and list of issues, one might write the following JSON:
 
-```
+```json
 {
     "project": "/Users/me/Projects/Foo",
     "commands": [
