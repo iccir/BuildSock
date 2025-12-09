@@ -32,6 +32,16 @@ DefaultSettings = {
     "issue_panel_settings":  { }
 }
 
+DefaultIssuePanelSettings = {
+    "result_file_regex": "^([^:]*):([0-9]+):?([0-9]+)?:? ",
+    "result_line_regex": "",
+    "word_wrap": True,
+    "line_numbers": False,
+    "gutter": False,
+    "margin": 0,
+    "scroll_past_end": False
+}
+
 
 class Theme(enum.IntEnum):
     LIGHT = 0,
@@ -343,13 +353,9 @@ class WindowManager:
         panel = self.panel
 
         panel_settings = panel.settings()
-        panel_settings.set("result_file_regex", "^([^:]*):([0-9]+):?([0-9]+)?:? (.*)$")
-        panel_settings.set("result_line_regex", "")
-        panel_settings.set("word_wrap", True)
-        panel_settings.set("line_numbers", False)
-        panel_settings.set("gutter", False)
-        panel_settings.set("margin", 0)
-        panel_settings.set("scroll_past_end", False)
+        
+        for key, value in DefaultIssuePanelSettings.items():
+            panel_settings.set(key, value)
 
         if sBuildSockPlugin.settings["colorize_issue_panel"]:
             panel.assign_syntax("Packages/BuildSock/resources/IssuePanel.sublime-syntax")
