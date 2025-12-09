@@ -151,10 +151,10 @@ The default settings are:
     "colorize_issue_panel": false,
 
     // Used to customize the scope of gutter icons and region underlines
-    "generic_issue_scope": "region.redish",
-    "info_issue_scope":    "region.bluish",
-    "warning_issue_scope": "region.orangish",
-    "error_issue_scope":   "region.redish",
+    "generic_issue_scope":  "region.redish markup.issue.buildsock",
+    "info_issue_scope":     "region.bluish markup.info.buildsock",
+    "warning_issue_scope":  "region.yellowish markup.warning.buildsock",
+    "error_issue_scope":    "region.redish markup.error.buildsock",
     
     // Additional settings to apply to the issue output panel
     "issue_panel_settings": { }
