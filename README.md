@@ -38,9 +38,9 @@ For example, to show a failure message and list of issues, one might write the f
             "command": "show-issues",
             "issues": [
                 {
-                    message: "'Foo' is invalid",
-                    file: "folder/file.js",
-                    line: 42
+                    "message": "'Foo' is invalid",
+                    "file": "folder/file.js",
+                    "line": 42
                 }
             ]
         }
