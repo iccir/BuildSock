@@ -802,8 +802,9 @@ class BuildSockPlugin():
 
 
     def update_window_with_project(self, window: sublime.Window, project: Project):
-        issues = project.issues
-        pass
+        manager = self.get_window_manager(window)
+        manager.show_issues(project)
+        managers.show_status(project)
 
 
     def update_views(self, views: list[View]) -> None:
@@ -855,7 +856,6 @@ class BuildSockPlugin():
         for folder in window.folders():
             if project := self.path_to_project_map.get(folder):
                 self.update_window_with_project(window, project)
-                pass
 
 
     def handle_close_window(self, window: sublime.Window):
