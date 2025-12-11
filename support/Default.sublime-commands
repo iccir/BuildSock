@@ -1,0 +1,9 @@
+[
+    {
+        "caption": "Preferences: BuildSock",
+        "command": "edit_settings", "args": {
+            "base_file": "${packages}/BuildSock/BuildSock.sublime-settings",
+            "default": "{\n\t$0\n}\n"
+        }
+    }
+]

@@ -1,0 +1,32 @@
+{
+    // The path of the local socket
+    "socket_path": "/tmp/sublime.buildsock.sock",
+
+    // Used to control gutter icon vertical position.
+    // Valid values are: "lowest", "lower", "normal", "higher", or "highest".
+    "gutter_icon_adjust": "normal",
+
+    // Used to tweak issue icon vertical position.
+    "issue_icon_adjust": 0,
+
+    // Set to a string to use a custom font face for issue "details".
+    "details_font_face": null,
+
+    // Set to a string or number to use a custom font size for issue "details".
+    // If a string, must be a minihtml CSS unit.
+    // If a number, will be converted to a "px" CSS unit.
+    "details_font_size": null,
+
+    // If true,  the issues panel uses a custom syntax scheme to assign scopes
+    // If false, the issues panel uses the default "Plain Text" syntax
+    "colorize_issue_panel": false,
+
+    // Used to customize the scope of gutter icons and region underlines
+    "generic_issue_scope":  "region.redish markup.issue.buildsock",
+    "info_issue_scope":     "region.bluish markup.info.buildsock",
+    "warning_issue_scope":  "region.yellowish markup.warning.buildsock",
+    "error_issue_scope":    "region.redish markup.error.buildsock",
+
+    // Additional settings to apply to the issue output panel
+    "issue_panel_settings": { }
+}

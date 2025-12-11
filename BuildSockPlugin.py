@@ -16,24 +16,8 @@ import itertools
 import weakref
 import html
 
-StringOrNone = object()
-NumberOrNone = object()
 
-DefaultSettings = {
-    "socket_path":          "/tmp/sublime.buildsock.sock",
-    "gutter_icon_adjust":   "normal",
-    "issue_icon_adjust":    0,
-    "details_font_face":    StringOrNone,
-    "details_font_size":    NumberOrNone,
-    "colorize_issue_panel": False,
-    "generic_issue_scope":  "region.redish markup.issue.buildsock",
-    "info_issue_scope":     "region.bluish markup.info.buildsock",
-    "warning_issue_scope":  "region.yellowish markup.warning.buildsock",
-    "error_issue_scope":    "region.redish markup.error.buildsock",
-    "issue_panel_settings":  { }
-}
-
-DefaultIssuePanelSettings = {
+IssuePanelSettings = {
     "result_file_regex": "^([^:]*):([0-9]+):?([0-9]+)?:? ",
     "result_line_regex": "",
     "word_wrap": True,
@@ -120,8 +104,14 @@ GutterIconMap = {
 
 
 class BuildSockSettings(dict):
+    """Wraps sublime.Settings to provide type-safe/valid values."""
 
     def __init__(self, callback: Callable[[], None]) -> None:
+        # Loads the default settings from our package
+        default_contents = sublime.load_resource("Packages/BuildSock/BuildSock.sublime-settings")
+        self.__defaults = sublime.decode_value(default_contents)
+
+        # Loads the collated settings 
         self.__settings = sublime.load_settings("BuildSock.sublime-settings")
         self.callback = callback
 
@@ -130,17 +120,14 @@ class BuildSockSettings(dict):
 
 
     def _read_settings(self) -> None:
-        for key, default_value in DefaultSettings.items():
+
+        for key, default_value in self.__defaults.items():
             value = self.__settings.get(key)
             
-            if default_value == StringOrNone:
-                check = lambda: type(value) == str
-                default_value = None
-            
-            elif default_value == NumberOrNone:
-                check = lambda: isinstance(value, int) or isinstance(value, float)
-                default_value = None
-
+            if key == "details_font_face":
+                check = lambda: isinstance(value, str)
+            elif key == "details_font_size":
+                check = lambda: isinstance(value, (str, int, float))
             else:
                 check = lambda: type(value) == type(default_value)
                         
@@ -334,6 +321,7 @@ class WindowManager:
 
         self.phantom_dicts = [ ]
         self.image_cache = { }
+        self.issues = None
         
         self.status_message = None
         self.status_spinner = None
@@ -345,7 +333,7 @@ class WindowManager:
 
     def handle_settings_changed(self) -> None:
         self.setup_panel()
-        self._update_phantoms()
+        self._update_issues()
 
 
     def setup_panel(self) -> None:
@@ -353,7 +341,7 @@ class WindowManager:
 
         panel_settings = panel.settings()
         
-        for key, value in DefaultIssuePanelSettings.items():
+        for key, value in IssuePanelSettings.items():
             panel_settings.set(key, value)
 
         if sBuildSockPlugin.settings["colorize_issue_panel"]:
@@ -363,7 +351,7 @@ class WindowManager:
 
         for key, value in sBuildSockPlugin.settings["issue_panel_settings"].items():
             panel_settings.set(key, value)
-           
+        
         panel.set_read_only(True)
 
 
@@ -434,12 +422,15 @@ class WindowManager:
         font_face = sBuildSockPlugin.settings["details_font_face"]
         font_size = sBuildSockPlugin.settings["details_font_size"]
         
-        font_face_css = f"font-face: {font_face};" if font_face else ""
-
-        if font_size:
-            font_size_css = f"font-size: {font_size};"
+        if isinstance(font_size, (int, float)):
+            font_size_unit = f"{font_size}px;"
+        elif isinstance(font_size, str):
+            font_size_unit = font_size
         else:
-            font_size_css = f"font-size: 0.9rem;"
+            font_size_unit = "0.9rem"
+
+        font_face_css = f"font-face: {font_face};" if font_face else ""
+        font_size_css = f"font-size: {font_size_unit};"
 
         return """
             <body id="build-sock-details">
@@ -513,13 +504,11 @@ class WindowManager:
             self.spinner_timeout = None
 
 
-    def show_issues(self, project: Project) -> None:
-        issues = project.issues
+    def _update_issues(self) -> None:
+        issues = self.issues
         panel = self.panel
 
         panel.set_read_only(False)
-        panel.settings().set("result_base_dir", project.path)
-
         panel.run_command("select_all")
         panel.run_command("right_delete")
 
@@ -586,6 +575,12 @@ class WindowManager:
 
         self._update_phantoms()
 
+
+    def show_issues(self, project: Project) -> None:
+        self.issues = project.issues
+        self.panel.settings().set("result_base_dir", project.path)
+        self._update_issues()
+        
 
     def hide_issues(self) -> None:
         self.window.run_command("hide_panel", { "panel": "output.BuildSockIssues" })
@@ -799,7 +794,7 @@ class BuildSockPlugin():
     def update_window_with_project(self, window: sublime.Window, project: Project):
         manager = self.get_window_manager(window)
         manager.show_issues(project)
-        managers.show_status(project)
+        manager.show_status(project)
 
 
     def update_views(self, views: list[View]) -> None:
