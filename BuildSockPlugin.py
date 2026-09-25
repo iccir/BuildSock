@@ -691,8 +691,9 @@ class SocketServer:
             self.wait_for_connection_thread.start()
 
         except Exception as e:
-            self.socket.close()
-            self.socket = None
+            if self.socket:
+                self.socket.close()
+                self.socket = None
 
             sublime.error_message(f"BuildSock could not create a socket at '{self.socket_path}'\n\n Error: {e}")
 
