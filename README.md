@@ -12,6 +12,10 @@ Also, the output of the built-in build systems is limited – results are typica
 
 BuildSock solves these problems.
 
+## Compatibility
+
+BuildSock requires Sublime Text 4200+ running on macOS or Linux. Windows is currently not supported due to the lack of Unix sockets.
+
 ## Design
 
 ![Screenshot](docs/main.png)
